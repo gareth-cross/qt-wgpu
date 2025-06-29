@@ -2,3 +2,9 @@ build/
 build-*/
 .cache/
 *.txt.user
+dependencies/dawn
+.vscode/
+.idea/
+# pixi environments
+.pixi
+*.egg-info

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QDirect3D12Widget" name="centralwidget"/>
+  <widget class="QWGPUWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -26,14 +26,14 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
  <customwidgets>
   <customwidget>
-   <class>QDirect3D12Widget</class>
+   <class>QWGPUWidget</class>
    <extends>QWidget</extends>
-   <header>QDirect3D12Widget.h</header>
+   <header>QWGPUWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <resources/>
  <connections/>
 </ui>
