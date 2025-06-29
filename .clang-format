@@ -6,3 +6,8 @@ PointerAlignment: Left
 DerivePointerAlignment: false
 IncludeBlocks: Preserve
 ---
+Language: ObjC
+ColumnLimit: 120
+PointerAlignment: Left
+DerivePointerAlignment: false
+IncludeBlocks: Preserve

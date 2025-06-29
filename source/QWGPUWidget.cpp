@@ -1,21 +1,28 @@
 #include "QWGPUWidget.h"
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <windows.h>
-
 #include "wgpu_error_scope.hpp"
 #include "wgpu_textures.hpp"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>  // GetModuleHandle
+
+// Get a surface descriptor from windows HWND.
 std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfaceDescriptor(QWidget* const widget) {
   wgpu::SurfaceSourceWindowsHWND* desc = new wgpu::SurfaceSourceWindowsHWND();
-  desc->hwnd = static_cast<HWND>(reinterpret_cast<void*>(widget->winId()));
+  desc->hwnd = reinterpret_cast<HWND>(widget->winId());
   desc->hinstance = GetModuleHandle(nullptr);
   return {desc, [](wgpu::ChainedStruct* desc) { delete static_cast<wgpu::SurfaceSourceWindowsHWND*>(desc); }};
 }
+#elif defined(__APPLE__)
 
-#endif  // _WIN32
+// Defined in create_surface_descriptor.mm
+std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfaceDescriptor(QWidget* const widget);
+
+#else
+#error Implement linux/wayland support!
+#endif
 
 wgpu::Surface CreateSurfaceForWidget(const wgpu::Instance& instance, QWidget* const widget) {
   auto chained_descriptor = CreateSurfaceDescriptor(widget);
@@ -218,6 +225,7 @@ void QWGPUWidget::onFrameTimerFired() {
   constexpr std::uint32_t sample_count = 4;
 
   if (width_ != this->width() || height_ != this->height()) {
+    // TODO: These dimensions probably don't account for retina displays on mac.
     width_ = this->width();
     height_ = this->height();
     context_->configure_surface(static_cast<std::uint32_t>(width_), static_cast<std::uint32_t>(height_));
