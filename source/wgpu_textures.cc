@@ -6,17 +6,16 @@
 
 namespace wgpu_utils {
 
-wgpu::Texture create_multisample_texure(const wgpu_context& ctx, std::uint32_t width, std::uint32_t height,
-                                        std::uint32_t sample_count) {
-  WGPU_ERROR_FUNCTION_SCOPE(ctx.device());
+wgpu::Texture create_multisample_texure(const wgpu::Device& device, const wgpu::TextureFormat texture_format,
+                                        std::uint32_t width, std::uint32_t height, std::uint32_t sample_count) {
+  WGPU_ERROR_FUNCTION_SCOPE(device);
 
   wgpu::TextureDescriptor texture_descriptor{};
-  texture_descriptor.format = ctx.surface_format().value();
+  texture_descriptor.format = texture_format;
   texture_descriptor.usage = wgpu::TextureUsage::RenderAttachment;
   texture_descriptor.size = wgpu::Extent3D{std::max(width, 1u), std::max(height, 1u)};
   texture_descriptor.sampleCount = sample_count;
-
-  return ctx.device().CreateTexture(&texture_descriptor);
+  return device.CreateTexture(&texture_descriptor);
 }
 
 wgpu::TextureView get_next_surface_texture_view(const wgpu::Device& device, const wgpu::Surface& surface) {

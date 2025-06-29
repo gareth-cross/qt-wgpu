@@ -19,19 +19,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::connectSlots() {
-  // Q_ASSERT(ui->view);
-  // connect(m_pScene, &QDirect3D12Widget::ticked, this,
-  // &MainWindow::tick); connect(m_pScene, &QDirect3D12Widget::rendered, this,
-  // &MainWindow::render);
-}
-
-void MainWindow::closeEvent(QCloseEvent* event) {
-  event->ignore();
-  // m_pScene->release();
-  event->accept();
-}
-
 void MainWindow::init() {
   disconnect(gpuWidget_, &QWGPUWidget::deviceInitialized, this, &MainWindow::init);
   qInfo() << "Device initialized, starting render loop.";

@@ -54,6 +54,9 @@ wgpu::Device request_device(const wgpu::Adapter& adapter) {
                         });
 
   while (!request_ended) {
+#if defined(EMSCRIPTEN)
+    emscripten_sleep(100);
+#endif
   }
 
   if (device_out) {

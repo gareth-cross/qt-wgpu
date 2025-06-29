@@ -18,14 +18,10 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
 
-  void connectSlots();
-
  public slots:
   void init();
 
  private:
-  void closeEvent(QCloseEvent* event) override;
-
   Ui::MainWindow* ui;
 
   QWGPUWidget* gpuWidget_;

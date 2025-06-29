@@ -10,7 +10,7 @@
 
 namespace wgpu_utils {
 
-// Log errors within a specific scope.
+// Log errors within a specific scope. On destruction, print errors to stdout.
 class wgpu_error_scope {
  public:
   wgpu_error_scope(const wgpu::Device& device, const std::string_view name);
