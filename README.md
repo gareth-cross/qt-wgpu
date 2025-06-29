@@ -20,6 +20,7 @@ Disclaimers:
 The primary piece of the implementation is `CreateSurfaceDescriptor`. There needs to be an implementation of this method for every target platform:
 - On Windows we can cast `QWidget::winId()` into an `HWND` handle and create a `wgpu::SurfaceSourceWindowsHWND`.
 - Similarly on OSX, we can cast `QWidget::windId()` into an `NSView*` - see [`create_surface_descriptor.mm`](source/create_surface_descriptor.mm).
+- Hypothetically, wayland support should be easy enough to add: Retrieve a `wl_display*` and `wl_surface*` pointer from Qt, and construct a `wgpu::SurfaceSourceWaylandSurface`.
 
 In addition, the widget needs to be created with attributes `Qt::WA_NativeWindow` and `Qt::WA_PaintOnScreen` so that rendering can be handled by WebGPU.
 
@@ -31,7 +32,7 @@ Credit to Gilad Reich for their [QtDirect3D](https://github.com/giladreich/QtDir
 
 ### Checkout git submodules:
 
-[libfmt](https://github.com/fmtlib/fmt) and [magic_enum](https://github.com/Neargye/magic_enum) are used for printing to console.
+[libfmt](https://github.com/fmtlib/fmt) and [magic_enum](https://github.com/Neargye/magic_enum) are used for printing some adapter info to the console:
 
 ```bash
 git submodule update --init
@@ -64,7 +65,7 @@ cmake .. \
 
 `CMAKE_PREFIX_PATH` should be set to the install prefix for your chosen Qt version and platform. For example on OSX it might default to `~/Qt/6.9.1/macos`. On Windows it might be `C:\Qt\6.91\msvc2022_64`.
 
-I have only tested this project using Ninja as the build-system, your mileage may vary.
+I have only tested this project using Ninja as the buildsystem.
 
 ### Build and run:
 
@@ -73,4 +74,21 @@ From the build directory:
 ```bash
 cmake --build . -j8
 ./qt-wgpu
+```
+
+As the window opens, stdout should include some information about your device:
+```
+Creating wgpu instance...
+Creating wgpu surface...
+Requesting adapter and device...
+Adapter properties:
+ - vendorID: 0x10de
+ - vendor: nvidia
+ - architecture: ampere
+ - deviceID: 0x2216
+ - device: NVIDIA GeForce RTX 3080
+ - description: D3D12 driver version 32.0.15.6094
+ - adapterType: DiscreteGPU
+ - backendType: D3D12
+...
 ```
