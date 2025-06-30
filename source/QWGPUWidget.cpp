@@ -1,5 +1,7 @@
 #include "QWGPUWidget.h"
 
+#include <QCoreApplication>
+
 #include "wgpu_error_scope.hpp"
 #include "wgpu_textures.hpp"
 
@@ -21,6 +23,7 @@ std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfa
 std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfaceDescriptor(QWidget* const widget);
 
 #elif defined(__linux__)
+// We need the private headers from QPlatformNativeInterface on linux.
 #include <QtGui/6.9.1/QtGui/qpa/qplatformnativeinterface.h>
 #include <QGuiApplication>
 
@@ -50,8 +53,12 @@ QWGPUWidget::QWGPUWidget(QWidget* parent) : QWidget(parent) {
   setAutoFillBackground(true);
   setPalette(pal);
 
+  // Required for non-transparent status bar on linux:
+  QCoreApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
+
   setFocusPolicy(Qt::StrongFocus);
-  // setAttribute(Qt::WA_DontCreateNativeAncestors);
+  // NOTE(gareth): Unclear if WA_DontCreateNativeAncestors is strictly required here.
+  setAttribute(Qt::WA_DontCreateNativeAncestors);
   setAttribute(Qt::WA_NativeWindow);
   setAttribute(Qt::WA_PaintOnScreen);
   setAttribute(Qt::WA_NoSystemBackground);
