@@ -24,3 +24,9 @@ void MainWindow::init() {
   qInfo() << "Device initialized, starting render loop.";
   gpuWidget_->run();
 }
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+  qInfo("MainWindow::closeEvent");
+  gpuWidget_->stop();
+  QMainWindow::closeEvent(event);
+}

@@ -71,6 +71,12 @@ void QWGPUWidget::run() {
   start_time_ = std::chrono::steady_clock::now();
 }
 
+// Required for things to teardown properly:
+void QWGPUWidget::stop() {
+  disconnect(&frame_timer_, &QTimer::timeout, this, &QWGPUWidget::onFrameTimerFired);
+  frame_timer_.stop();
+}
+
 // Start a render pass by clearing depth + RGB.
 wgpu::RenderPassEncoder make_render_pass_encoder_with_targets(const wgpu::CommandEncoder& encoder,
                                                               const wgpu::TextureView& target_texture_view,
@@ -365,8 +371,10 @@ void QWGPUWidget::showEvent(QShowEvent* event) {
   QWidget::showEvent(event);
 }
 
-void QWGPUWidget::resizeEvent(QResizeEvent*) {
+void QWGPUWidget::resizeEvent(QResizeEvent* event) {
   if (context_) {
+    // Re-draw during resize or we get weird flickering on linux.
     onFrameTimerFired();
   }
+  QWidget::resizeEvent(event);
 }
