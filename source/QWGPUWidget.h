@@ -14,9 +14,9 @@ class QWGPUWidget : public QWidget {
 
  public:
   QWGPUWidget(QWidget* parent);
-  ~QWGPUWidget() = default;
 
   void run();
+  void stop();
 
  signals:
   void deviceInitialized();
