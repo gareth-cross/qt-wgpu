@@ -15,8 +15,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Gui)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Gui)
 
 set(PROJECT_SOURCES
     source/main.cpp
@@ -43,6 +43,10 @@ endif()
 qt_add_executable(qt-wgpu MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 target_link_libraries(qt-wgpu PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+if(UNIX AND NOT APPLE)
+  target_link_libraries(qt-wgpu PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
+endif()
+
 target_link_libraries(qt-wgpu PRIVATE webgpu_dawn fmt::fmt-header-only
                                       magic_enum::magic_enum)
 target_include_directories(qt-wgpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source)
