@@ -1,4 +1,5 @@
 #pragma once
+#include <QEvent>
 #include <QTimer>
 #include <QWidget>
 
@@ -27,6 +28,7 @@ class QWGPUWidget : public QWidget {
   QPaintEngine* paintEngine() const override;
   void paintEvent(QPaintEvent* event) override;
   void showEvent(QShowEvent* event) override;
+  void resizeEvent(QResizeEvent*) override;
 
   std::optional<wgpu_utils::wgpu_context> context_{};
   int width_{0};

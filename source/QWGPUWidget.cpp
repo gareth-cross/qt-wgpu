@@ -1,5 +1,7 @@
 #include "QWGPUWidget.h"
 
+#include <QCoreApplication>
+
 #include "wgpu_error_scope.hpp"
 #include "wgpu_textures.hpp"
 
@@ -20,8 +22,22 @@ std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfa
 // Defined in create_surface_descriptor.mm
 std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfaceDescriptor(QWidget* const widget);
 
+#elif defined(__linux__)
+// We need the private headers from QPlatformNativeInterface on linux.
+#include <QtGui/6.9.1/QtGui/qpa/qplatformnativeinterface.h>
+#include <QGuiApplication>
+
+std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)> CreateSurfaceDescriptor(QWidget* const widget) {
+  wgpu::SurfaceSourceWaylandSurface* desc = new wgpu::SurfaceSourceWaylandSurface();
+  QPlatformNativeInterface* const platformNativeInterface = QGuiApplication::platformNativeInterface();
+  Q_ASSERT(platformNativeInterface);
+  desc->display = platformNativeInterface->nativeResourceForIntegration("wl_display");
+  desc->surface = platformNativeInterface->nativeResourceForWindow("surface", widget->windowHandle());
+  qInfo("Got wayland display %p and surface %p", desc->display, desc->surface);
+  return {desc, [](wgpu::ChainedStruct* desc) { delete static_cast<wgpu::SurfaceSourceWaylandSurface*>(desc); }};
+}
 #else
-#error Implement linux/wayland support!
+#error Platform not supported.
 #endif
 
 wgpu::Surface CreateSurfaceForWidget(const wgpu::Instance& instance, QWidget* const widget) {
@@ -37,7 +53,12 @@ QWGPUWidget::QWGPUWidget(QWidget* parent) : QWidget(parent) {
   setAutoFillBackground(true);
   setPalette(pal);
 
+  // Required for non-transparent status bar on linux:
+  QCoreApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
+
   setFocusPolicy(Qt::StrongFocus);
+  // NOTE(gareth): Unclear if WA_DontCreateNativeAncestors is strictly required here.
+  setAttribute(Qt::WA_DontCreateNativeAncestors);
   setAttribute(Qt::WA_NativeWindow);
   setAttribute(Qt::WA_PaintOnScreen);
   setAttribute(Qt::WA_NoSystemBackground);
@@ -238,7 +259,8 @@ void QWGPUWidget::onFrameTimerFired() {
     depth_texture_ = wgpu_utils::create_depth_texture(context_->device(), static_cast<std::uint32_t>(width_),
                                                       static_cast<std::uint32_t>(height_), sample_count);
 
-    qInfo("Configured surface: %i x %i", width_, height_);
+    qInfo("Configured surface: %i x %i (window size is %i x %i)", width_, height_, this->window()->width(),
+          this->window()->height());
   }
 
   if (!pipeline_) {
@@ -341,4 +363,10 @@ void QWGPUWidget::showEvent(QShowEvent* event) {
     emit deviceInitialized();
   }
   QWidget::showEvent(event);
+}
+
+void QWGPUWidget::resizeEvent(QResizeEvent*) {
+  if (context_) {
+    onFrameTimerFired();
+  }
 }

@@ -9,8 +9,7 @@
 This is an example of integrating WebGPU into a Qt application using [google dawn](https://github.com/google/dawn). At least at the time of this writing, I could not find an example of combining Qt with WebGPU.
 
 Disclaimers:
-- This repository is only intended as sample code. I have implemented and tested support for Windows and OSX platforms against `Qt 6.9`.
-- I have not yet tried Linux/wayland - this is a TODO for now (PRs are welcome).
+- This repository is only intended as sample code. I have implemented and tested support for Windows, OSX, and Wayland against `Qt 6.9`.
 - The dawn API is not yet stable, and upstream changes may break this in future.
 
 ## How does it work?
@@ -20,9 +19,11 @@ Disclaimers:
 The primary piece of the implementation is `CreateSurfaceDescriptor`. There needs to be an implementation of this method for every target platform:
 - On Windows we can cast `QWidget::winId()` into an `HWND` handle and create a `wgpu::SurfaceSourceWindowsHWND`.
 - Similarly on OSX, we can cast `QWidget::windId()` into an `NSView*` - see [`create_surface_descriptor.mm`](source/create_surface_descriptor.mm).
-- Hypothetically, wayland support should be easy enough to add: Retrieve a `wl_display*` and `wl_surface*` pointer from Qt, and construct a `wgpu::SurfaceSourceWaylandSurface`.
+- On Wayland, we use `QPlatformNativeInterface` to retrieve a `wl_surface` and `wl_display` pointer in order to construct `wgpu::SurfaceSourceWaylandSurface`.
 
-In addition, the widget needs to be created with attributes `Qt::WA_NativeWindow` and `Qt::WA_PaintOnScreen` so that rendering can be handled by WebGPU.
+In addition:
+- The widget needs to be created with attributes `Qt::WA_NativeWindow` and `Qt::WA_PaintOnScreen` so that rendering can be handled by WebGPU.
+- On Wayland, application property `Qt::AA_DontCreateNativeWidgetSiblings` must be set - or strange artifacts occur.
 
 The rest of the files in the project are just wgpu utilities for the purpose of the demo.
 
